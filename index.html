@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pocket Radio - Israeli Stations</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Custom styles for the radio */
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent; /* Disable tap highlight on mobile */
+        }
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+        /* Custom shadow for a more realistic plastic look */
+        .radio-shadow {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1), inset 0 2px 4px 0 rgba(255, 255, 255, 0.5);
+        }
+        .button-shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.12);
+        }
+        .button-shadow:active {
+            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.15);
+        }
+        .screen-shadow {
+             box-shadow: inset 0 2px 8px 0 rgba(0, 0, 0, 0.4);
+        }
+        /* Style for the frequency display animation */
+        .freq-bar {
+            width: 2px;
+            background-color: #34D399; /* Emerald 400 */
+            animation: level 1.5s infinite ease-in-out;
+        }
+        @keyframes level {
+            0%, 100% { transform: scaleY(0.1); }
+            50% { transform: scaleY(1); }
+        }
+
+        /* Modal styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background-color: #1f2937; /* Gray 800 */
+            color: white;
+            padding: 2rem;
+            border-radius: 0.75rem; /* rounded-xl */
+            max-width: 90%;
+            max-height: 80%;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay.show .modal-content {
+            transform: translateY(0);
+        }
+        .modal-close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="bg-gray-800 flex items-center justify-center h-screen overflow-hidden">
+
+    <!-- Audio element to play the radio stream -->
+    <audio id="audioPlayer" crossOrigin="anonymous"></audio>
+
+    <!-- Main Pocket Radio Body -->
+    <div id="radioBody" class="w-full max-w-sm h-full max-h-[700px] sm:h-auto sm:max-h-[85vh] bg-rose-500 rounded-3xl radio-shadow p-6 flex flex-col justify-between transition-colors duration-500">
+        
+        <!-- Top Section: Speaker Grille & Brand -->
+        <div class="flex-shrink-0">
+            <div class="flex justify-between items-center mb-4">
+                <h1 class="text-2xl font-bold text-white tracking-wider">POCKET-FM</h1>
+                <div class="w-12 h-6 flex items-center justify-center">
+                   <div id="powerIndicator" class="w-3 h-3 bg-rose-200 rounded-full transition-colors duration-300"></div>
+                </div>
+            </div>
+            <!-- Speaker Grille -->
+            <div class="space-y-1.5 p-4 bg-rose-400/50 rounded-lg">
+                <div class="h-1.5 bg-rose-300/70 rounded-full"></div>
+                <div class="h-1.5 bg-rose-300/70 rounded-full"></div>
+                <div class="h-1.5 bg-rose-300/70 rounded-full"></div>
+                <div class="h-1.5 bg-rose-300/70 rounded-full"></div>
+                <div class="h-1.5 bg-rose-300/70 rounded-full"></div>
+            </div>
+        </div>
+
+        <!-- Middle Section: Display Screen -->
+        <div class="flex-grow my-6 flex items-center justify-center">
+            <div class="w-full h-full bg-gray-800 rounded-xl screen-shadow p-4 flex flex-col justify-between">
+                <div class="text-center">
+                    <p class="text-sm text-gray-400 uppercase tracking-widest">STATION</p>
+                    <h2 id="stationName" class="text-2xl md:text-3xl font-bold text-white truncate">Select a Station</h2>
+                    <p id="stationGenre" class="text-emerald-400 font-medium">&nbsp;</p>
+                </div>
+                <!-- Frequency visualizer -->
+                <div class="h-16 flex justify-center items-end space-x-1">
+                    <!-- Bars will be generated by JS when playing -->
+                     <div id="visualizer" class="h-full flex justify-center items-end space-x-1 opacity-0 transition-opacity duration-500"></div>
+                </div>
+                   <div class="text-center">
+                    <p class="font-orbitron text-gray-500 text-lg" id="frequencyDisplay">--.--</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Section: Controls -->
+        <div class="flex-shrink-0">
+            <div class="flex items-center justify-evenly space-x-4 mb-4">
+                <!-- Previous Button -->
+                <button id="prevBtn" class="p-4 bg-white/30 rounded-full button-shadow transition-transform active:scale-90">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                </button>
+                
+                <!-- Play/Pause Button -->
+                <button id="playPauseBtn" class="p-6 bg-white/30 rounded-full button-shadow transition-transform active:scale-95">
+                     <svg id="playIcon" class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
+                     <svg id="pauseIcon" class="w-8 h-8 text-white hidden" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1zm4 0a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+                </button>
+
+                <!-- Next Button -->
+                <button id="nextBtn" class="p-4 bg-white/30 rounded-full button-shadow transition-transform active:scale-90">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                </button>
+            </div>
+            <!-- New LLM Feature Buttons -->
+            <div class="flex flex-col space-y-2 mt-4">
+                <button id="stationInsightBtn" class="w-full py-3 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-full button-shadow transition-colors duration-200 active:scale-98">
+                    ✨ Station Insight ✨
+                </button>
+                <button id="genreExplorerBtn" class="w-full py-3 bg-purple-500 hover:bg-purple-600 text-white font-bold rounded-full button-shadow transition-colors duration-200 active:scale-98">
+                    ✨ Genre Explorer ✨
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- LLM Response Modal -->
+    <div id="llmModal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close-btn" id="llmModalCloseBtn">&times;</button>
+            <h3 id="llmModalTitle" class="text-xl font-bold mb-4 text-center"></h3>
+            <p id="llmModalContent" class="text-gray-300 text-sm leading-relaxed"></p>
+            <div id="llmLoadingIndicator" class="text-center mt-4 hidden">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto"></div>
+                <p class="text-white mt-2">Generating insight...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // DOM Elements
+            const audioPlayer = document.getElementById('audioPlayer');
+            const playPauseBtn = document.getElementById('playPauseBtn');
+            const playIcon = document.getElementById('playIcon');
+            const pauseIcon = document.getElementById('pauseIcon');
+            const nextBtn = document.getElementById('nextBtn');
+            const prevBtn = document.getElementById('prevBtn');
+            const stationNameEl = document.getElementById('stationName');
+            const stationGenreEl = document.getElementById('stationGenre');
+            const frequencyDisplay = document.getElementById('frequencyDisplay');
+            const powerIndicator = document.getElementById('powerIndicator');
+            const visualizer = document.getElementById('visualizer');
+            const radioBody = document.getElementById('radioBody');
+
+            // LLM Modal Elements
+            const llmModal = document.getElementById('llmModal');
+            const llmModalCloseBtn = document.getElementById('llmModalCloseBtn');
+            const llmModalTitle = document.getElementById('llmModalTitle');
+            const llmModalContent = document.getElementById('llmModalContent');
+            const llmLoadingIndicator = document.getElementById('llmLoadingIndicator');
+            const stationInsightBtn = document.getElementById('stationInsightBtn');
+            const genreExplorerBtn = document.getElementById('genreExplorerBtn');
+
+
+            // Radio Stations Data - Israeli Stations
+            const stations = [
+                {
+                    name: "Kan 88 FM",
+                    genre: "Eclectic Israeli & World Music",
+                    freq: "88.0 FM",
+                    color: "bg-purple-700",
+                    streamUrl: "/proxy-audio?url=https://kanliveicy.media.kan.org.il/icy/kan88_mp3"
+                },
+                {
+                    name: "Radio Lev Hamedina",
+                    genre: "Mediterranean & Pop",
+                    freq: "91.0 FM",
+                    color: "bg-orange-600",
+                    streamUrl: "/proxy-audio?url=https://cdn.cybercdn.live/Lev_Hamedina/Audio/icecast.audio"
+                },
+                {
+                    name: "Galgalatz",
+                    genre: "Pop & Israeli Hits",
+                    freq: "91.8 FM",
+                    color: "bg-blue-600",
+                    streamUrl: "/proxy-audio?url=https://glzwizzlv.bynetcdn.com/glglz_alt_mp3"
+                },
+                {
+                    name: "Reshet Bet",
+                    genre: "News & Talk",
+                    freq: "95.5 FM",
+                    color: "bg-red-700",
+                    streamUrl: "/proxy-audio?url=https://playerservices.streamtheworld.com/api/livestream-redirect/KAN_BET.mp3"
+                },
+                {
+                    name: "Reshet Gimel",
+                    genre: "Israeli Music",
+                    freq: "97.8 FM",
+                    color: "bg-yellow-500",
+                    streamUrl: "/proxy-audio?url=https://kanliveicy.media.kan.org.il/icy/kangimmel_mp3"
+                },
+                {
+                    name: "Radio Lelo Hafsaka",
+                    genre: "Talk & Pop",
+                    freq: "103.0 FM",
+                    color: "bg-yellow-600",
+                    streamUrl: "/proxy-audio?url=https://cdn.cybercdn.live/103FM/Live/icecast.audio"
+                },
+                {
+                    name: "Radio Tel Aviv 102 FM",
+                    genre: "Mainstream Pop & Hits",
+                    freq: "102.0 FM",
+                    color: "bg-pink-600",
+                    streamUrl: "/proxy-audio?url=https://102.livecdn.biz/102fm_mp3"
+                },
+                {
+                    name: "Radio Haifa",
+                    genre: "Pop & Local News",
+                    freq: "107.5 FM",
+                    color: "bg-teal-600",
+                    streamUrl: "/proxy-audio?url=https://1075.livecdn.biz/radiohaifa"
+                }
+            ];
+
+            // Sort stations by frequency (numeric part only)
+            stations.sort((a, b) => {
+                const freqA = parseFloat(a.freq.replace(' FM', ''));
+                const freqB = parseFloat(b.freq.replace(' FM', ''));
+                return freqA - freqB;
+            });
+
+            let currentStationIndex = 0;
+            let isPlaying = false;
+
+            // --- Functions ---
+
+            function updateUI() {
+                const station = stations[currentStationIndex];
+                stationNameEl.textContent = station.name;
+                stationGenreEl.textContent = station.genre;
+                frequencyDisplay.textContent = station.freq;
+                
+                // Remove all bg-* classes and add the new one
+                const colorClasses = Array.from(radioBody.classList).filter(c => c.startsWith('bg-'));
+                radioBody.classList.remove(...colorClasses);
+                radioBody.classList.add(station.color);
+
+                // Update power indicator color based on playing state
+                let indicatorColorClass = station.color.replace('bg-', 'bg-').replace('-500', '-200').replace('-600', '-300').replace('-700', '-400');
+                if (isPlaying) {
+                    indicatorColorClass = 'bg-emerald-400'; // Bright green when playing
+                }
+                const powerIndicatorColorClasses = Array.from(powerIndicator.classList).filter(c => c.startsWith('bg-'));
+                powerIndicator.classList.remove(...powerIndicatorColorClasses);
+                powerIndicator.classList.add(indicatorColorClass);
+            }
+
+            function loadStation(index) {
+                currentStationIndex = index;
+                updateUI();
+                audioPlayer.src = stations[currentStationIndex].streamUrl;
+                if (isPlaying) {
+                    audioPlayer.play().catch(e => {
+                        console.error("Playback error after loading new station:", e);
+                        stationNameEl.textContent = "Playback Issue";
+                        stationGenreEl.textContent = "Could not load station. Try playing again.";
+                        const powerIndicatorColorClasses = Array.from(powerIndicator.classList).filter(c => c.startsWith('bg-'));
+                        powerIndicator.classList.remove(...powerIndicatorColorClasses);
+                        powerIndicator.classList.add('bg-red-500'); 
+                    });
+                }
+            }
+
+            function togglePlayPause() {
+                if (isPlaying) {
+                    audioPlayer.pause();
+                } else {
+                    const fullProxiedUrl = window.location.origin + stations[currentStationIndex].streamUrl;
+                    if (!audioPlayer.src || audioPlayer.src !== fullProxiedUrl) {
+                        loadStation(currentStationIndex);
+                    } else {
+                        audioPlayer.play().catch(e => {
+                            console.error("Playback failed, likely user interaction needed or stream error.", e);
+                            stationNameEl.textContent = "Playback Failed";
+                            stationGenreEl.textContent = "Click play again or try another station.";
+                            const powerIndicatorColorClasses = Array.from(powerIndicator.classList).filter(c => c.startsWith('bg-'));
+                            powerIndicator.classList.remove(...powerIndicatorColorClasses);
+                            powerIndicator.classList.add('bg-red-500'); 
+                        });
+                    }
+                }
+            }
+
+            function createVisualizerBars() {
+                visualizer.innerHTML = '';
+                for (let i = 0; i < 20; i++) {
+                    const bar = document.createElement('div');
+                    bar.classList.add('freq-bar');
+                    bar.style.animationDelay = `${Math.random() * 1.5}s`;
+                    bar.style.height = `${Math.random() * 80 + 20}%`;
+                    visualizer.appendChild(bar);
+                }
+            }
+
+            function showLlmModal(title, content) {
+                llmModalTitle.textContent = title;
+                llmModalContent.textContent = content;
+                llmLoadingIndicator.classList.add('hidden');
+                llmModal.classList.add('show');
+            }
+
+            function hideLlmModal() {
+                llmModal.classList.remove('show');
+                llmModalTitle.textContent = '';
+                llmModalContent.textContent = '';
+                llmLoadingIndicator.classList.add('hidden');
+            }
+
+            async function generateLlmResponse(prompt, title) {
+                llmModalTitle.textContent = title;
+                llmModalContent.textContent = ''; // Clear previous content
+                llmLoadingIndicator.classList.add('hidden'); // Ensure hidden before showing
+                llmModal.classList.add('show');
+
+                try {
+                    // IMPORTANT: If running locally outside of a Canvas environment,
+                    // replace "" with your actual Google Cloud API Key.
+                    // For Canvas, leave it as "".
+                    const apiKey = "AIzaSyC-EOAagdvV5p849R2d3fvavFjou6OHZMo"; 
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                    
+                    console.log("LLM API: Sending request to Gemini API...");
+                    console.log("LLM API: Prompt:", prompt);
+                    llmLoadingIndicator.classList.remove('hidden'); // Show loading indicator
+
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: prompt }] }] })
+                    });
+                    
+                    console.log(`LLM API: Received response status: ${response.status} ${response.statusText}`);
+
+                    if (!response.ok) {
+                        const errorBody = await response.text(); // Get raw text for non-OK responses
+                        console.error(`LLM API: Error response body: ${errorBody}`);
+                        throw new Error(`API request failed with status ${response.status}: ${response.statusText}. Body: ${errorBody}`);
+                    }
+
+                    const result = await response.json();
+                    console.log("LLM API: Full response data:", result);
+
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        const text = result.candidates[0].content.parts[0].text;
+                        llmModalContent.textContent = text;
+                        console.log("LLM API: Successfully generated text.");
+                    } else {
+                        llmModalContent.textContent = "Could not generate insight. The API returned an unexpected structure or no candidates.";
+                        console.error("LLM API: Gemini API response structure unexpected or no candidates:", result);
+                    }
+                } catch (error) {
+                    console.error("LLM API: Error calling Gemini API:", error);
+                    llmModalContent.textContent = `Failed to fetch insight. Error: ${error.message}. Please check console for details.`;
+                } finally {
+                    llmLoadingIndicator.classList.add('hidden'); // Hide loading indicator
+                }
+            }
+            
+            // --- Event Listeners ---
+
+            playPauseBtn.addEventListener('click', togglePlayPause);
+            nextBtn.addEventListener('click', () => {
+                currentStationIndex = (currentStationIndex + 1) % stations.length;
+                loadStation(currentStationIndex);
+            });
+            prevBtn.addEventListener('click', () => {
+                currentStationIndex = (currentStationIndex - 1 + stations.length) % stations.length;
+                loadStation(currentStationIndex);
+            });
+
+            llmModalCloseBtn.addEventListener('click', hideLlmModal);
+
+            stationInsightBtn.addEventListener('click', () => {
+                const currentStation = stations[currentStationIndex];
+                const prompt = `Tell me a very short, engaging story or some interesting facts about a radio station named "${currentStation.name}" that plays "${currentStation.genre}" music and broadcasts on "${currentStation.freq}". Keep it concise and fictional if necessary, focusing on its unique vibe or history.`;
+                generateLlmResponse(prompt, `Insight for ${currentStation.name}`);
+            });
+
+            genreExplorerBtn.addEventListener('click', () => {
+                const currentStation = stations[currentStationIndex];
+                const prompt = `Provide a brief overview and 3-5 interesting facts about the music genre "${currentStation.genre}". Focus on its origins, key characteristics, and influence.`;
+                generateLlmResponse(prompt, `Exploring ${currentStation.genre}`);
+            });
+
+
+            // Audio player events
+            audioPlayer.addEventListener('play', () => {
+                isPlaying = true;
+                playIcon.classList.add('hidden');
+                pauseIcon.classList.remove('hidden');
+                const powerIndicatorColorClasses = Array.from(powerIndicator.classList).filter(c => c.startsWith('bg-'));
+                powerIndicator.classList.remove(...powerIndicatorColorClasses);
+                powerIndicator.classList.add('bg-emerald-400'); 
+                visualizer.classList.remove('opacity-0');
+            });
+            audioPlayer.addEventListener('pause', () => {
+                isPlaying = false;
+                playIcon.classList.remove('hidden');
+                pauseIcon.classList.add('hidden');
+                updateUI(); 
+                visualizer.classList.add('opacity-0');
+            });
+            audioPlayer.addEventListener('error', (e) => {
+                console.error("Audio Error:", e);
+                stationNameEl.textContent = "Stream Error";
+                stationGenreEl.textContent = "Could not load station. Try another.";
+                isPlaying = false;
+                playIcon.classList.remove('hidden');
+                pauseIcon.classList.add('hidden');
+                visualizer.classList.add('opacity-0');
+                const powerIndicatorColorClasses = Array.from(powerIndicator.classList).filter(c => c.startsWith('bg-'));
+                powerIndicator.classList.remove(...powerIndicatorColorClasses);
+                powerIndicator.classList.add('bg-red-500'); 
+            });
+
+
+            // --- Initialization ---
+            createVisualizerBars();
+            updateUI(); 
+        });
+    </script>
+</body>
+</html>
