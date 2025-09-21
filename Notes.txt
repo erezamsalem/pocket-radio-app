@@ -1,0 +1,100 @@
+PS C:\MICROSOFT\pocket-radio-app> git branch -M main
+PS C:\MICROSOFT\pocket-radio-app> gh repo create pocket-radio-app --public --source=. --remote=origin --push
+✓ Created repository erezamsalem/pocket-radio-app on github.com
+  https://github.com/erezamsalem/pocket-radio-app
+✓ Added remote https://github.com/erezamsalem/pocket-radio-app.git
+Enumerating objects: 920, done.
+Counting objects: 100% (920/920), done.
+Delta compression using up to 12 threads
+Compressing objects: 100% (854/854), done.
+Writing objects: 100% (920/920), 1.14 MiB | 1.30 MiB/s, done.
+Total 920 (delta 154), reused 0 (delta 0), pack-reused 0 (from 0)
+remote: Resolving deltas: 100% (154/154), done.
+To https://github.com/erezamsalem/pocket-radio-app.git
+ * [new branch]      HEAD -> main
+branch 'main' set up to track 'origin/main'.
+✓ Pushed commits to https://github.com/erezamsalem/pocket-radio-app.git
+PS C:\MICROSOFT\pocket-radio-app> git fetch origin
+PS C:\MICROSOFT\pocket-radio-app> git ls-tree -r origin/main
+100644 blob 27592c817d6e4658c948c5c0dbeba8fcfa56be6e    .gitignore
+100644 blob 84184c6f56b31ddc838f22aa5d2ce5feaf16c0d1    Notes.txt
+100644 blob d006e110c4f46f9d77320f130205cc9110e6734b    index.html
+100644 blob 6667b4823518100eeaa1e7b5c078041b879ace0b    package-lock.json
+100644 blob 47d9cb09a8c12e2683c7159c9b47f262de2425af    package.json
+100644 blob 0f33b610432a7f22335414118a9fdc80d24f3deb    server.js
+PS C:\MICROSOFT\pocket-radio-app>
+PS C:\MICROSOFT\pocket-radio-app> # Stage the new Dockerfile and .dockerignore files
+PS C:\MICROSOFT\pocket-radio-app> git add Dockerfile .dockerignore
+PS C:\MICROSOFT\pocket-radio-app>
+PS C:\MICROSOFT\pocket-radio-app> # Commit the changes
+PS C:\MICROSOFT\pocket-radio-app> git commit -m "Add Dockerfile for automated builds"
+[main 8d5d43a] Add Dockerfile for automated builds
+ 2 files changed, 30 insertions(+)
+ create mode 100644 .dockerignore
+ create mode 100644 Dockerfile
+PS C:\MICROSOFT\pocket-radio-app>
+PS C:\MICROSOFT\pocket-radio-app> # Push the commit to your main branch on GitHub
+PS C:\MICROSOFT\pocket-radio-app> git push
+Enumerating objects: 5, done.
+Counting objects: 100% (5/5), done.
+Delta compression using up to 12 threads
+Compressing objects: 100% (4/4), done.
+Writing objects: 100% (4/4), 939 bytes | 469.00 KiB/s, done.
+Total 4 (delta 1), reused 0 (delta 0), pack-reused 0 (from 0)
+remote: Resolving deltas: 100% (1/1), completed with 1 local object.
+To https://github.com/erezamsalem/pocket-radio-app.git
+   f429fd2..8d5d43a  main -> main
+PS C:\MICROSOFT\pocket-radio-app>
+
+PS C:\MICROSOFT\pocket-radio-app> docker build -t erezamsalem/pocket-radio-app:latest .
+[+] Building 5.2s (11/11) FINISHED                                                                              docker:desktop-linux
+ => [internal] load build definition from Dockerfile                                                                            0.1s
+ => => transferring dockerfile: 912B                                                                                            0.0s
+ => [internal] load metadata for docker.io/library/node:20-alpine                                                               1.5s
+ => [auth] library/node:pull token for registry-1.docker.io                                                                     0.0s
+ => [internal] load .dockerignore                                                                                               0.1s
+ => => transferring context: 202B                                                                                               0.0s
+ => [1/5] FROM docker.io/library/node:20-alpine@sha256:eabac870db94f7342d6c33560d6613f188bbcf4bbe1f4eb47d5e2a08e1a37722         0.0s
+ => => resolve docker.io/library/node:20-alpine@sha256:eabac870db94f7342d6c33560d6613f188bbcf4bbe1f4eb47d5e2a08e1a37722         0.0s
+ => [internal] load build context                                                                                               0.1s
+ => => transferring context: 66.73kB                                                                                            0.1s
+ => CACHED [2/5] WORKDIR /usr/src/app                                                                                           0.0s
+ => [3/5] COPY package*.json ./                                                                                                 0.1s
+ => [4/5] RUN npm ci --only=production                                                                                          2.3s
+ => [5/5] COPY . .                                                                                                              0.0s
+ => exporting to image                                                                                                          0.8s
+ => => exporting layers                                                                                                         0.4s
+ => => exporting manifest sha256:b85dc84e2c69fee441a38971d557dbda35576b81d65bd624d294a46faa95e0d8                               0.0s
+ => => exporting config sha256:8ee6c6aca8a824e286b29e197224ec578ed2dd8ae1720c71458256145e25c691                                 0.0s
+ => => exporting attestation manifest sha256:6091986ea25d736d8da9e407f9eaea834cf2298dda709bacbb50c37b40b0b5a6                   0.0s
+ => => exporting manifest list sha256:f5fb6196d9274cc1342446bce8cf77ddbfe691a0d0904b7210cdded4a4634c2c                          0.0s
+ => => naming to docker.io/erezamsalem/pocket-radio-app:latest                                                                  0.0s
+ => => unpacking to docker.io/erezamsalem/pocket-radio-app:latest                                                               0.3s
+PS C:\MICROSOFT\pocket-radio-app> docker run -p 3001:3001 -d erezamsalem/pocket-radio-app:latest
+d34e158d72aef3f51266a2baffbd6afce968ce6ad1ca793c3e11221c8853e630
+docker: Error response from daemon: ports are not available: exposing port TCP 0.0.0.0:3001 -> 127.0.0.1:0: listen tcp 0.0.0.0:3001: bind: Only one usage of each socket address (protocol/network address/port) is normally permitted.
+
+Run 'docker run --help' for more information
+PS C:\MICROSOFT\pocket-radio-app> docker push erezamsalem/pocket-radio-app:latest
+The push refers to repository [docker.io/erezamsalem/pocket-radio-app]
+916e36a7188d: Pushed
+d3a07bf435a4: Pushed
+fd345d7e43c5: Mounted from erezamsalem/public-garden-app
+9824c27679d3: Mounted from erezamsalem/public-garden-app
+c88300f8759a: Mounted from erezamsalem/public-garden-app
+5a52cec60f69: Pushed
+0de821d16564: Mounted from erezamsalem/public-garden-app
+426c669b7eea: Pushed
+637721d61316: Mounted from erezamsalem/public-garden-app
+latest: digest: sha256:f5fb6196d9274cc1342446bce8cf77ddbfe691a0d0904b7210cdded4a4634c2c size: 856
+PS C:\MICROSOFT\pocket-radio-app>
+
+
+21.09.2025
+
+PS C:\MICROSOFT\pocket-radio-app> kubectl create namespace pocket-radio-app
+namespace/pocket-radio-app created
+PS C:\MICROSOFT\pocket-radio-app> kubectl apply -f pocket-radio-deployment.yaml
+deployment.apps/pocket-radio-deployment created
+service/pocket-radio-service created
+PS C:\MICROSOFT\pocket-radio-app>

@@ -1,0 +1,49 @@
+# pocket-radio-deployment.yaml
+
+# This section defines the Deployment for your application.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pocket-radio-deployment
+  namespace: pocket-radio-app  # Deploys this resource into the specified namespace.
+  labels:
+    app: pocket-radio
+spec:
+  replicas: 1  # We'll start with one running instance of the app.
+  selector:
+    matchLabels:
+      app: pocket-radio # This connects the Deployment to the Pods it manages.
+  template:
+    metadata:
+      labels:
+        app: pocket-radio # The label for the Pods created by this Deployment.
+    spec:
+      containers:
+      - name: pocket-radio-container
+        # This is the Docker image you want to run.
+        image: erezamsalem/pocket-radio-app:latest
+        ports:
+        # This is the port your Node.js server listens on inside the container.
+        - containerPort: 3001
+
+---
+
+# This section defines the Service to expose your application.
+apiVersion: v1
+kind: Service
+metadata:
+  name: pocket-radio-service
+  namespace: pocket-radio-app  # Deploys this resource into the specified namespace.
+spec:
+  # 'NodePort' makes the service accessible from outside the Minikube cluster.
+  type: NodePort
+  selector:
+    # This selector links the Service to the Pods managed by your Deployment.
+    # It must match the labels of the Pods (app: pocket-radio).
+    app: pocket-radio
+  ports:
+    - protocol: TCP
+      # The port the Service will be available on inside the cluster.
+      port: 3001
+      # The port on your container that traffic should be sent to.
+      targetPort: 3001
