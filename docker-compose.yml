@@ -1,0 +1,24 @@
+# Specifies the version of the Docker Compose file format.
+# Version '3.8' is a good, modern choice.
+version: '3.8'
+
+# Defines the different services (containers) that make up your application.
+services:
+  # 'app' is a custom name for your Node.js service.
+  app:
+    # 'build: .' tells Docker Compose to look for a 'Dockerfile' in the
+    # current directory and build a Docker image from it.
+    build: .
+
+    # 'ports' maps a port from your local machine (host) to a port inside
+    # the container.
+    # Format: "HOST_PORT:CONTAINER_PORT"
+    # We map port 3001 on your machine to port 3001 in the container,
+    # which is where your Node.js app is listening.
+    ports:
+      - "3001:3001"
+
+    # 'env_file' tells Docker Compose to load environment variables from a
+    # specified file. This is how your API_KEY gets into the container.
+    env_file:
+      - ./.env

@@ -94,7 +94,63 @@ PS C:\MICROSOFT\pocket-radio-app>
 
 PS C:\MICROSOFT\pocket-radio-app> kubectl create namespace pocket-radio-app
 namespace/pocket-radio-app created
-PS C:\MICROSOFT\pocket-radio-app> kubectl apply -f pocket-radio-deployment.yaml
-deployment.apps/pocket-radio-deployment created
-service/pocket-radio-service created
+
+kubectl create secret generic pocket-radio-secret --from-env-file=.env -n pocket-radio-app
+
+
+PS C:\Users\ereza> cd "C:\MICROSOFT\pocket-radio-app"
+PS C:\MICROSOFT\pocket-radio-app> git add index.html
+PS C:\MICROSOFT\pocket-radio-app> git commit -m "Refactor: Improve responsiveness for mobile screens"
+[main dc956b7] Refactor: Improve responsiveness for mobile screens
+ 1 file changed, 63 insertions(+), 54 deletions(-)
+PS C:\MICROSOFT\pocket-radio-app> git push
+Enumerating objects: 5, done.
+Counting objects: 100% (5/5), done.
+Delta compression using up to 8 threads
+Compressing objects: 100% (3/3), done.
+Writing objects: 100% (3/3), 1.49 KiB | 764.00 KiB/s, done.
+Total 3 (delta 2), reused 0 (delta 0), pack-reused 0 (from 0)
+remote: Resolving deltas: 100% (2/2), completed with 2 local objects.
+To https://github.com/erezamsalem/pocket-radio-app.git
+   3efdb16..dc956b7  main -> main
+PS C:\MICROSOFT\pocket-radio-app> docker build -t erezamsalem/pocket-radio-app:latest .
+[+] Building 2.7s (11/11) FINISHED                                                                 docker:desktop-linux
+ => [internal] load build definition from Dockerfile                                                               0.1s
+ => => transferring dockerfile: 912B                                                                               0.0s
+ => [internal] load metadata for docker.io/library/node:20-alpine                                                  2.0s
+ => [auth] library/node:pull token for registry-1.docker.io                                                        0.0s
+ => [internal] load .dockerignore                                                                                  0.0s
+ => => transferring context: 202B                                                                                  0.0s
+ => [1/5] FROM docker.io/library/node:20-alpine@sha256:eabac870db94f7342d6c33560d6613f188bbcf4bbe1f4eb47d5e2a08e1  0.0s
+ => => resolve docker.io/library/node:20-alpine@sha256:eabac870db94f7342d6c33560d6613f188bbcf4bbe1f4eb47d5e2a08e1  0.0s
+ => [internal] load build context                                                                                  0.0s
+ => => transferring context: 21.04kB                                                                               0.0s
+ => CACHED [2/5] WORKDIR /usr/src/app                                                                              0.0s
+ => CACHED [3/5] COPY package*.json ./                                                                             0.0s
+ => CACHED [4/5] RUN npm ci --only=production                                                                      0.0s
+ => [5/5] COPY . .                                                                                                 0.1s
+ => exporting to image                                                                                             0.3s
+ => => exporting layers                                                                                            0.1s
+ => => exporting manifest sha256:42622cbdb2ff2ebdb64a6fb2e569033cbab541ad16a501a0c49759167ab346d7                  0.0s
+ => => exporting config sha256:d0732c33a4813e3182440cd746e5604e9097ed1d1b6f9a4d599802c0a3405637                    0.0s
+ => => exporting attestation manifest sha256:be052e47ec71fe432153773fde49988d15857fce27dd2dce3d4c32a6c715ca96      0.0s
+ => => exporting manifest list sha256:23e0fbf31cf5279fd20f96950d26351e7b708634c648eb138fcc3a39c414390e             0.0s
+ => => naming to docker.io/erezamsalem/pocket-radio-app:latest                                                     0.0s
+ => => unpacking to docker.io/erezamsalem/pocket-radio-app:latest                                                  0.1s
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/rh8olmk6va12gchuc9zr3tusz
+PS C:\MICROSOFT\pocket-radio-app> docker push erezamsalem/pocket-radio-app:latest
+The push refers to repository [docker.io/erezamsalem/pocket-radio-app]
+829ad22855a0: Layer already exists
+9c2e92717c5f: Pushed
+0de821d16564: Layer already exists
+c88300f8759a: Layer already exists
+fd345d7e43c5: Layer already exists
+076da7616735: Layer already exists
+7c2de84a74e6: Pushed
+9824c27679d3: Layer already exists
+1ffa0482eb80: Layer already exists
+latest: digest: sha256:23e0fbf31cf5279fd20f96950d26351e7b708634c648eb138fcc3a39c414390e size: 856
+PS C:\MICROSOFT\pocket-radio-app> kubectl rollout restart deployment pocket-radio-deployment -n pocket-radio-app
+deployment.apps/pocket-radio-deployment restarted
 PS C:\MICROSOFT\pocket-radio-app>
