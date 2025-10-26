@@ -29,11 +29,8 @@
 
     <audio id="audioPlayer" crossOrigin="anonymous"></audio>
 
-    <!-- Main Pocket Radio Body -->
-    <!-- Responsive adjustments: p-4 for small screens, adjusted max-h -->
     <div id="radioBody" class="w-full max-w-sm h-full max-h-[95vh] bg-rose-500 rounded-3xl radio-shadow p-4 sm:p-6 flex flex-col justify-between transition-colors duration-500">
         
-        <!-- Top Section: Speaker Grille & Brand -->
         <div class="flex-shrink-0">
             <div class="flex justify-between items-center mb-3">
                 <h1 class="text-xl sm:text-2xl font-bold text-white tracking-wider">POCKET-FM</h1>
@@ -41,7 +38,6 @@
                     <div id="powerIndicator" class="w-3 h-3 bg-rose-200 rounded-full transition-colors duration-300"></div>
                 </div>
             </div>
-            <!-- Speaker Grille -->
             <div class="space-y-1 p-3 sm:space-y-1.5 sm:p-4 bg-rose-400/50 rounded-lg">
                 <div class="h-1.5 bg-rose-300/70 rounded-full"></div>
                 <div class="h-1.5 bg-rose-300/70 rounded-full"></div>
@@ -51,18 +47,13 @@
             </div>
         </div>
 
-        <!-- Middle Section: Display Screen -->
-        <!-- Responsive adjustments: my-4 for vertical margin -->
         <div class="flex-grow my-4 flex items-center justify-center">
             <div class="w-full h-full bg-gray-800 rounded-xl screen-shadow p-4 flex flex-col justify-between">
                 <div class="text-center">
                     <p class="text-xs sm:text-sm text-gray-400 uppercase tracking-widest">STATION</p>
-                    <!-- Responsive adjustments: text-xl base size -->
                     <h2 id="stationName" class="text-xl sm:text-2xl md:text-3xl font-bold text-white truncate">Select a Station</h2>
                     <p id="stationGenre" class="text-emerald-400 font-medium text-sm sm:text-base">&nbsp;</p>
                 </div>
-                <!-- Frequency visualizer -->
-                <!-- Responsive adjustments: h-12 base height -->
                 <div class="h-12 sm:h-16 flex justify-center items-end space-x-1">
                     <div id="visualizer" class="h-full flex justify-center items-end space-x-1 opacity-0 transition-opacity duration-500"></div>
                 </div>
@@ -72,28 +63,21 @@
             </div>
         </div>
 
-        <!-- Bottom Section: Controls -->
         <div class="flex-shrink-0">
-            <!-- Responsive adjustments: smaller padding/icons on buttons -->
             <div class="flex items-center justify-evenly space-x-2 sm:space-x-4 mb-4">
-                <!-- Previous Button -->
                 <button id="prevBtn" class="p-3 sm:p-4 bg-white/30 rounded-full button-shadow transition-transform active:scale-90">
                     <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
                 </button>
                 
-                <!-- Play/Pause Button -->
                 <button id="playPauseBtn" class="p-5 sm:p-6 bg-white/30 rounded-full button-shadow transition-transform active:scale-95">
                     <svg id="playIcon" class="w-7 h-7 sm:w-8 sm:h-8 text-white" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
                     <svg id="pauseIcon" class="w-7 h-7 sm:w-8 sm:h-8 text-white hidden" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1zm4 0a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
                 </button>
 
-                <!-- Next Button -->
                 <button id="nextBtn" class="p-3 sm:p-4 bg-white/30 rounded-full button-shadow transition-transform active:scale-90">
                     <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                 </button>
             </div>
-            <!-- New LLM Feature Buttons -->
-             <!-- Responsive adjustments: py-2 for vertical padding -->
             <div class="flex flex-col space-y-2 mt-2 sm:mt-4">
                 <button id="stationInsightBtn" class="w-full py-2 sm:py-3 text-sm sm:text-base bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-full button-shadow transition-colors duration-200 active:scale-98">
                     ✨ Station Insight ✨
@@ -105,7 +89,6 @@
         </div>
     </div>
 
-    <!-- LLM Response Modal -->
     <div id="llmModal" class="modal-overlay">
         <div class="modal-content">
             <button class="modal-close-btn" id="llmModalCloseBtn">&times;</button>
@@ -151,6 +134,9 @@
                 { name: "Galgalatz", genre: "Pop & Israeli Hits", freq: "91.8 FM", color: "bg-blue-600", streamUrl: "/proxy-audio?url=https://glzwizzlv.bynetcdn.com/glglz_alt_mp3" },
                 { name: "Reshet Bet", genre: "News & Talk", freq: "95.5 FM", color: "bg-red-700", streamUrl: "/proxy-audio?url=https://playerservices.streamtheworld.com/api/livestream-redirect/KAN_BET.mp3" },
                 { name: "Reshet Gimel", genre: "Israeli Music", freq: "97.8 FM", color: "bg-yellow-500", streamUrl: "/proxy-audio?url=https://kanliveicy.media.kan.org.il/icy/kangimmel_mp3" },
+                // --- THIS IS THE NEW STATION YOU REQUESTED ---
+                { name: "Kan Kol Hamusika", genre: "Classical & Culture", freq: "98.5 FM", color: "bg-indigo-600", streamUrl: "/proxy-audio?url=https://kanliveicy.media.kan.org.il/icy/kankolhamusica_mp3" },
+                // ---------------------------------------------
                 { name: "Radio Lelo Hafsaka", genre: "Talk & Pop", freq: "103.0 FM", color: "bg-yellow-600", streamUrl: "/proxy-audio?url=https://cdn.cybercdn.live/103FM/Live/icecast.audio" },
                 { name: "Radio Tel Aviv 102 FM", genre: "Mainstream Pop & Hits", freq: "102.0 FM", color: "bg-pink-600", streamUrl: "/proxy-audio?url=https://102.livecdn.biz/102fm_mp3" },
                 { name: "Radio Haifa", genre: "Pop & Local News", freq: "107.5 FM", color: "bg-teal-600", streamUrl: "/proxy-audio?url=https://1075.livecdn.biz/radiohaifa" }
@@ -326,4 +312,3 @@
     </script>
 </body>
 </html>
-
